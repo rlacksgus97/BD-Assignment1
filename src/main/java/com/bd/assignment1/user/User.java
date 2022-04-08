@@ -2,16 +2,22 @@ package com.bd.assignment1.user;
 
 import com.bd.assignment1.comment.Comment;
 import com.bd.assignment1.post.Post;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class User {
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String email;
