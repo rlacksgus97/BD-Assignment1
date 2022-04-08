@@ -2,15 +2,19 @@ package com.bd.assignment1.post;
 
 import com.bd.assignment1.config.jwt.JwtService;
 import com.bd.assignment1.post.dto.CreatePostReqDto;
+import com.bd.assignment1.post.dto.SimplePostResDto;
 import com.bd.assignment1.post.dto.ReadPostResDto;
 import com.bd.assignment1.post.dto.UpdatePostReqDto;
 import com.bd.assignment1.user.User;
 import com.bd.assignment1.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -78,5 +82,11 @@ public class PostService {
             throw new Exception("게시물을 삭제할 권한이 없습니다.");
         }
         return id;
+    }
+
+    public List<SimplePostResDto> list(Pageable pageable) {
+        Page<SimplePostResDto> postPage = postRepository.findAll(pageable)
+                .map(SimplePostResDto::toDto);
+        return postPage.getContent();
     }
 }
