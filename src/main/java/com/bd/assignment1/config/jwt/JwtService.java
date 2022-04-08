@@ -10,8 +10,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Component
 public class JwtService {
@@ -38,7 +36,7 @@ public class JwtService {
         }
     }
 
-    public Map<String, Object> getTokenInfo(String key) throws Exception {
+    public Long getTokenInfo() throws Exception {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String jwt = request.getHeader("Authorization");
         Jws<Claims> claims = null;
@@ -47,7 +45,7 @@ public class JwtService {
         } catch (Exception e) {
             throw new Exception();
         }
-        Map<String, Object> value = (LinkedHashMap<String, Object>)claims.getBody().get(key);
-        return value;
+        Object userId = claims.getBody().get("userId");
+        return Long.valueOf(userId.toString());
     }
 }
