@@ -1,12 +1,16 @@
 package com.bd.assignment1.post;
 
 import com.bd.assignment1.post.dto.CreatePostReqDto;
+import com.bd.assignment1.post.dto.SimplePostResDto;
 import com.bd.assignment1.post.dto.ReadPostResDto;
 import com.bd.assignment1.post.dto.UpdatePostReqDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/post")
@@ -33,5 +37,15 @@ public class PostController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> delete(@PathVariable Long id) throws Exception {
         return ResponseEntity.ok(postService.delete(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SimplePostResDto>> list(Pageable pageable) {
+        return ResponseEntity.ok(postService.list(pageable));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<SimplePostResDto>> search(@RequestParam String keyword) {
+        return ResponseEntity.ok(postService.search(keyword));
     }
 }
