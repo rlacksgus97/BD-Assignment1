@@ -84,9 +84,22 @@ public class PostService {
         return id;
     }
 
+    @Transactional
     public List<SimplePostResDto> list(Pageable pageable) {
         Page<SimplePostResDto> postPage = postRepository.findAll(pageable)
                 .map(SimplePostResDto::toDto);
         return postPage.getContent();
+    }
+
+    @Transactional
+    public List<SimplePostResDto> search(String keyword) {
+        List<Post> posts = postRepository.findByTitleContaining(keyword);
+        List<SimplePostResDto> simplePostResDtos = new ArrayList<>();
+        if (posts.size() != 0) {
+            for (Post p : posts) {
+                simplePostResDtos.add(SimplePostResDto.toDto(p));
+            }
+        }
+        return simplePostResDtos;
     }
 }

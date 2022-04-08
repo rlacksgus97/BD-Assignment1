@@ -43,4 +43,9 @@ public class PostController {
     public ResponseEntity<List<SimplePostResDto>> list(Pageable pageable) {
         return ResponseEntity.ok(postService.list(pageable));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<SimplePostResDto>> search(@RequestParam String keyword) {
+        return ResponseEntity.ok(postService.search(keyword));
+    }
 }
