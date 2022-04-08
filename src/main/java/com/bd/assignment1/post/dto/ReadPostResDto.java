@@ -11,4 +11,5 @@ public class ReadPostResDto {
     private String writer;
     private String content;
     private Category category;
+    private int count;
 }

@@ -40,13 +40,20 @@ public class PostService {
 
     @Transactional
     public ReadPostResDto read(Long id) throws Exception {
+        Long userId = jwtService.getTokenInfo();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("존재하지 않는 유저입니다."));
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new Exception("존재하지 않는 게시글입니다."));
+        if (!post.getReaders().contains(user)) {
+            post.getReaders().add(user);
+        }
         return ReadPostResDto.builder()
                 .title(post.getTitle())
                 .writer(post.getUser().getEmail())
                 .content(post.getContent())
                 .category(post.getCategory())
+                .count(post.getReaders().size())
                 .build();
     }
 
