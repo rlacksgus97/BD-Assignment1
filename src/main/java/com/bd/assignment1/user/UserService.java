@@ -19,10 +19,10 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public JoinResDto join(JoinReqDto joinDto) throws Exception {
+    public JoinResDto join(JoinReqDto joinDto) {
         Optional<User> user = userRepository.findByEmail(joinDto.getEmail());
         if (user.isPresent()) {
-            throw new Exception("이미 존재하는 이메일입니다.");
+            throw new RuntimeException("이미 존재하는 이메일입니다.");
         } else {
             User newUser = User.builder()
                     .email(joinDto.getEmail())
@@ -33,13 +33,13 @@ public class UserService {
     }
 
     @Transactional
-    public LoginResDto login(LoginReqDto loginDto) throws Exception {
+    public LoginResDto login(LoginReqDto loginDto) {
         User user = userRepository.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new Exception("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
         if (user.getPassword().equals(loginDto.getPassword())) {
             return new LoginResDto(jwtService.createToken(user.getId()));
         } else {
-            throw new Exception("비밀번호가 틀렸습니다.");
+            throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
     }
 }

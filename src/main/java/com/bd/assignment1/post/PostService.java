@@ -25,10 +25,10 @@ public class PostService {
     private final PostRepository postRepository;
 
     @Transactional
-    public Long create(CreatePostReqDto createPostReqDto) throws Exception {
+    public Long create(CreatePostReqDto createPostReqDto) {
         Long userId = jwtService.getTokenInfo();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new Exception("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
         Post post = Post.builder()
                 .title(createPostReqDto.getTitle())
                 .content(createPostReqDto.getContent())
@@ -39,12 +39,12 @@ public class PostService {
     }
 
     @Transactional
-    public ReadPostResDto read(Long id) throws Exception {
+    public ReadPostResDto read(Long id) {
         Long userId = jwtService.getTokenInfo();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new Exception("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new Exception("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 게시글입니다."));
         if (!post.getReaders().contains(user)) {
             post.getReaders().add(user);
         }
@@ -58,35 +58,35 @@ public class PostService {
     }
 
     @Transactional
-    public Long update(Long id, UpdatePostReqDto updatePostReqDto) throws Exception {
+    public Long update(Long id, UpdatePostReqDto updatePostReqDto) {
         Long userId = jwtService.getTokenInfo();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new Exception("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
 
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new Exception("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 게시글입니다."));
 
         if (post.getUser().equals(user)) {
             post.update(updatePostReqDto);
         } else {
-            throw new Exception("게시물을 수정할 권한이 없습니다.");
+            throw new RuntimeException("게시물을 수정할 권한이 없습니다.");
         }
         return id;
     }
 
     @Transactional
-    public Long delete(Long id) throws Exception {
+    public Long delete(Long id) {
         Long userId = jwtService.getTokenInfo();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new Exception("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
 
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new Exception("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 게시글입니다."));
 
         if (post.getUser().equals(user)) {
             postRepository.delete(post);
         } else {
-            throw new Exception("게시물을 삭제할 권한이 없습니다.");
+            throw new RuntimeException("게시물을 삭제할 권한이 없습니다.");
         }
         return id;
     }
