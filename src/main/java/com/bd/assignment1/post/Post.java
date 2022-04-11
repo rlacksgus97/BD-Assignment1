@@ -30,6 +30,9 @@ public class Post {
     @ManyToOne
     private User user;
 
+    @OneToMany
+    private List<User> readers = new ArrayList<>();
+
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
