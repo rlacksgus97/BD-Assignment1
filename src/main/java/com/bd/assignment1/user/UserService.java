@@ -37,9 +37,35 @@ public class UserService {
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
         if (user.getPassword().equals(loginDto.getPassword())) {
-            return new LoginResDto(jwtService.createToken(user.getId()));
+            String refreshToken = jwtService.createRefreshToken();
+            user.updateRefreshToken(refreshToken);
+            return new LoginResDto(jwtService.createAccessToken(user.getId()), refreshToken);
         } else {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
+    }
+
+    @Transactional
+    public Long logout() {
+        Long userId = jwtService.getTokenInfo();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+        user.updateRefreshToken("invalidate");
+        return userId;
+    }
+
+    @Transactional
+    public LoginResDto refreshToken(String accessToken, String refreshToken) {
+        // 유효기간이 만료되지 않은 토큰
+        if (!jwtService.isValidExceptExp(accessToken)) {
+            throw new RuntimeException("아직 유효기간이 만료되지 않은 토큰입니다.");
+        }
+        User user = userRepository.findById(jwtService.getTokenInfo())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+        if (!jwtService.isValid(accessToken) || !refreshToken.equals(user.getRefreshToken())) {
+            throw new RuntimeException("유효하지 않은 accessToken 또는 refreshToken입니다.");
+        }
+        user.updateRefreshToken(jwtService.createRefreshToken());
+        return new LoginResDto(jwtService.createAccessToken(user.getId()), refreshToken);
     }
 }

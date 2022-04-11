@@ -1,9 +1,6 @@
 package com.bd.assignment1.config.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -15,24 +12,45 @@ import java.util.Date;
 public class JwtService {
 
     private String secretKey = "BDBD";
-    private long exp = 1000L * 60 * 60;
+    private long accessTokenValidTime = 1000L * 60 * 60;
+    private long refreshTokenValidTime = 1000L * 60 * 60 * 24;
 
-    public String createToken(Long userId) {
+    public String createAccessToken(Long userId) {
+        Date now = new Date();
         return Jwts.builder()
-                .setHeaderParam("typ", "JWT") // 토큰 타입
-                .setSubject("userToken") // 토큰 제목
-                .setExpiration(new Date(System.currentTimeMillis() + exp)) // 토큰 유효시간
+                .setIssuedAt(now) // 토큰 발급시간
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidTime)) // 토큰 유효시간
                 .claim("userId", userId) // 토큰에 담을 데이터
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes()) // secretKey를 사용하여 해싱 암호화 알고리즘 처리
                 .compact(); // 직렬화, 문자열로 변경
     }
 
-    public boolean isValid(String token) throws Exception {
+    public String createRefreshToken() {
+        Date now = new Date();
+        return Jwts.builder()
+                .setIssuedAt(now) // 토큰 발급시간
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidTime)) // 토큰 유효시간
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes()) // secretKey를 사용하여 해싱 암호화 알고리즘 처리
+                .compact(); // 직렬화, 문자열로 변경
+    }
+
+    public boolean isValid(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            throw new Exception("토큰이 유효하지 않습니다.");
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+    }
+
+    public boolean isValidExceptExp(String token) {
+        try {
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token);
+            return claims.getBody().getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
