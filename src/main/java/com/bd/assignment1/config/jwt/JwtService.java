@@ -36,14 +36,14 @@ public class JwtService {
         }
     }
 
-    public Long getTokenInfo() throws Exception {
+    public Long getTokenInfo() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String jwt = request.getHeader("Authorization");
         Jws<Claims> claims = null;
         try {
             claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwt); // secretKey를 사용하여 복호화
         } catch (Exception e) {
-            throw new Exception();
+            throw new RuntimeException("토큰 정보를 불러올 수 없습니다.");
         }
         Object userId = claims.getBody().get("userId");
         return Long.valueOf(userId.toString());

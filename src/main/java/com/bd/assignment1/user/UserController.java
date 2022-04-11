@@ -18,12 +18,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public ResponseEntity<JoinResDto> join(@RequestBody JoinReqDto joinDto) throws Exception {
+    public ResponseEntity<JoinResDto> join(@RequestBody JoinReqDto joinDto) {
         return ResponseEntity.ok(userService.join(joinDto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResDto> login(@RequestBody LoginReqDto loginDto) throws Exception {
+    public ResponseEntity<LoginResDto> login(@RequestBody LoginReqDto loginDto) {
         return ResponseEntity.ok(userService.login(loginDto));
     }
 

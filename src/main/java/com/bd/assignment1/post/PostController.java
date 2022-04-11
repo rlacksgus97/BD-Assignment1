@@ -20,22 +20,22 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Long> create(@RequestBody CreatePostReqDto createPostReqDto) throws Exception {
+    public ResponseEntity<Long> create(@RequestBody CreatePostReqDto createPostReqDto) {
         return ResponseEntity.ok(postService.create(createPostReqDto));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReadPostResDto> read(@PathVariable Long id) throws Exception {
+    public ResponseEntity<ReadPostResDto> read(@PathVariable Long id) {
         return ResponseEntity.ok(postService.read(id));
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<Long> update(@PathVariable Long id, @RequestBody UpdatePostReqDto updatePostReqDto) throws Exception {
+    public ResponseEntity<Long> update(@PathVariable Long id, @RequestBody UpdatePostReqDto updatePostReqDto) {
         return ResponseEntity.ok(postService.update(id, updatePostReqDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Long> delete(@PathVariable Long id) throws Exception {
+    public ResponseEntity<Long> delete(@PathVariable Long id) {
         return ResponseEntity.ok(postService.delete(id));
     }
 
