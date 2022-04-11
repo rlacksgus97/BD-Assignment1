@@ -6,6 +6,7 @@ import com.bd.assignment1.user.dto.JoinResDto;
 import com.bd.assignment1.user.dto.LoginReqDto;
 import com.bd.assignment1.user.dto.LoginResDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,6 +18,7 @@ public class UserService {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public JoinResDto join(JoinReqDto joinDto) {
@@ -26,7 +28,7 @@ public class UserService {
         } else {
             User newUser = User.builder()
                     .email(joinDto.getEmail())
-                    .password(joinDto.getPassword())
+                    .password(passwordEncoder.encode(joinDto.getPassword()))
                     .build();
             return new JoinResDto(userRepository.save(newUser).getId());
         }
@@ -36,7 +38,7 @@ public class UserService {
     public LoginResDto login(LoginReqDto loginDto) {
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
-        if (user.getPassword().equals(loginDto.getPassword())) {
+        if (passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             String refreshToken = jwtService.createRefreshToken();
             user.updateRefreshToken(refreshToken);
             return new LoginResDto(jwtService.createAccessToken(user.getId()), refreshToken);
