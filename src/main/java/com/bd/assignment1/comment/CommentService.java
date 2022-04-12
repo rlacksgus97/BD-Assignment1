@@ -9,6 +9,8 @@ import com.bd.assignment1.post.Post;
 import com.bd.assignment1.post.PostRepository;
 import com.bd.assignment1.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -29,7 +31,6 @@ public class CommentService {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 게시글입니다."));
-
         Comment comment = Comment.builder()
                 .content(createCommentReqDto.getContent())
                 .build();
@@ -40,7 +41,7 @@ public class CommentService {
         if (createCommentReqDto.getParentId() != 0) {
             Comment parent = commentRepository.findById(createCommentReqDto.getParentId())
                     .orElseThrow(() -> new RuntimeException("존재하지 않는 부모 댓글입니다."));
-            if (parent.getParent().getId() > 0) {
+            if (parent.getParent() != null && parent.getParent().getId() > 0) {
                 throw new RuntimeException("대댓글은 1개까지만 허용됩니다.");
             }
             parent.addChild(comment);
@@ -49,19 +50,13 @@ public class CommentService {
         return commentRepository.save(comment).getId();
     }
 
+    //댓글 5개만, 각 댓글 당 대댓글도 5개만
     @Transactional
-    public List<ParentCommentResDto> list(Long postId) {
+    public List<ParentCommentResDto> getParentList(Long postId, Pageable pageable) {
         List<ParentCommentResDto> parentCommentResDtos = new ArrayList<>();
-        List<Comment> comments = commentRepository.findParentsByPostId(postId);
+        List<Comment> comments = commentRepository.findByPostIdAndParentId(postId, null, pageable);
         for (Comment p : comments) {
-            List<ChildCommentResDto> childCommentResDtos = new ArrayList<>();
-            List<Comment> children = p.getChildren();
-            for (Comment c : children) {
-                childCommentResDtos.add(ChildCommentResDto.builder()
-                        .user(c.getUser().getEmail())
-                        .content(c.getContent())
-                        .build());
-            }
+            List<ChildCommentResDto> childCommentResDtos = this.getChildrenList(p.getId(), PageRequest.of(0, 5));
             parentCommentResDtos.add(ParentCommentResDto.builder()
                     .user(p.getUser().getEmail())
                     .content(p.getContent())
@@ -73,7 +68,20 @@ public class CommentService {
     }
 
     @Transactional
-    public Long update(Long postId, Long commentId, UpdateCommentReqDto updateCommentReqDto) {
+    public List<ChildCommentResDto> getChildrenList(Long parentId, Pageable pageable) {
+        List<ChildCommentResDto> childCommentResDtos = new ArrayList<>();
+        List<Comment> children = commentRepository.findByParentId(parentId, pageable);
+        for (Comment c : children) {
+            childCommentResDtos.add(ChildCommentResDto.builder()
+                    .user(c.getUser().getEmail())
+                    .content(c.getContent())
+                    .build());
+        }
+        return childCommentResDtos;
+    }
+
+    @Transactional
+    public Long update(Long commentId, UpdateCommentReqDto updateCommentReqDto) {
         User user = jwtService.getUserFromJwt();
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 댓글입니다."));
@@ -86,7 +94,7 @@ public class CommentService {
     }
 
     @Transactional
-    public Long delete(Long postId, Long commentId) {
+    public Long delete(Long commentId) {
         User user = jwtService.getUserFromJwt();
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 댓글입니다."));
