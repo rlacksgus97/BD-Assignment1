@@ -1,6 +1,9 @@
 package com.bd.assignment1.config.jwt;
 
+import com.bd.assignment1.user.User;
+import com.bd.assignment1.user.UserRepository;
 import io.jsonwebtoken.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -9,11 +12,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class JwtService {
 
     private String secretKey = "BDBD";
     private long accessTokenValidTime = 1000L * 60 * 60;
     private long refreshTokenValidTime = 1000L * 60 * 60 * 24;
+
+    private final UserRepository userRepository;
 
     public String createAccessToken(Long userId) {
         Date now = new Date();
@@ -56,7 +62,7 @@ public class JwtService {
 
     public Long getTokenInfo() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String jwt = request.getHeader("Authorization");
+        String jwt = request.getHeader("X-AUTH-TOKEN");
         Jws<Claims> claims = null;
         try {
             claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwt); // secretKey를 사용하여 복호화
@@ -65,5 +71,12 @@ public class JwtService {
         }
         Object userId = claims.getBody().get("userId");
         return Long.valueOf(userId.toString());
+    }
+
+    public User getUserFromJwt() {
+        Long userId = this.getTokenInfo();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+        return user;
     }
 }

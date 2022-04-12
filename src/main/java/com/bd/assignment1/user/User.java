@@ -35,4 +35,14 @@ public class User {
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    public void addPost(Post post) {
+        post.setUser(this);
+        this.getPosts().add(post);
+    }
+
+    public void addComment(Comment comment) {
+        comment.setUser(this);
+        this.getComments().add(comment);
+    }
 }
