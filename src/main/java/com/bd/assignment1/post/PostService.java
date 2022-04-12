@@ -33,8 +33,8 @@ public class PostService {
                 .title(createPostReqDto.getTitle())
                 .content(createPostReqDto.getContent())
                 .category(createPostReqDto.getCategory())
-                .user(user)
                 .build();
+        user.addPost(post);
         return postRepository.save(post).getId();
     }
 

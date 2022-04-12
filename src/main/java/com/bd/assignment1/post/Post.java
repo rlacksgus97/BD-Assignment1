@@ -41,4 +41,9 @@ public class Post {
         this.content = updatePostReqDto.getContent();
         this.category = updatePostReqDto.getCategory();
     }
+
+    public void addComment(Comment comment) {
+        comment.setPost(this);
+        this.getComments().add(comment);
+    }
 }
