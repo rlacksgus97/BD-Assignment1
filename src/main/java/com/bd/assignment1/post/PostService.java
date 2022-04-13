@@ -33,6 +33,7 @@ public class PostService {
                 .title(createPostReqDto.getTitle())
                 .content(createPostReqDto.getContent())
                 .category(createPostReqDto.getCategory())
+                .watched(0L)
                 .build();
         user.addPost(post);
         return postRepository.save(post).getId();
@@ -47,13 +48,14 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 게시글입니다."));
         if (!post.getReaders().contains(user)) {
             post.getReaders().add(user);
+            post.setWatched(post.getWatched()+1);
         }
         return ReadPostResDto.builder()
                 .title(post.getTitle())
                 .writer(post.getUser().getEmail())
                 .content(post.getContent())
                 .category(post.getCategory())
-                .count(post.getReaders().size())
+                .watched(post.getWatched())
                 .build();
     }
 

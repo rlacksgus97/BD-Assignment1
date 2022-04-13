@@ -33,6 +33,8 @@ public class Post {
     @OneToMany
     private List<User> readers = new ArrayList<>();
 
+    private Long watched;
+
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
